@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word Master</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    .game-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      max-width: 600px;
+      margin: 0 auto;
+      position: relative;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .menu-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .menu-button:hover {
+      background: #45a049;
+    }
+    .menu-dropdown {
+      display: none;
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    .menu-dropdown button {
+      display: block;
+      width: 100%;
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .menu-dropdown button:hover {
+      background: #f0f0f0;
+    }
+    .word-display {
+      font-size: 2em;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+    .input-container {
+      margin: 20px 0;
+    }
+    .input-container input {
+      padding: 10px;
+      font-size: 1.2em;
+      width: 80%;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+    }
+    .timer {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .score {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin: 10px 0;
+    }
+    .message {
+      font-size: 1.2em;
+      margin: 10px 0;
+      color: #4CAF50;
+    }
+    .level {
+      font-size: 1.2em;
+      margin: 10px 0;
+    }
+    .hide {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <button class="menu-button" onclick="toggleMenu()">Menu</button>
+    <div class="menu-dropdown" id="menu-dropdown">
+      <button onclick="restartGame()">Restart</button>
+      <button onclick="selectLevel()">Select Another Level</button>
+      <button onclick="quitGame()">Quit</button>
+    </div>
+    <h1>Word Master</h1>
+    <div class="level-select" id="level-select">
+      <h3>Select Level:</h3>
+      <button onclick="startGame(1)">Level 1</button>
+      <button onclick="startGame(2)">Level 2</button>
+      <button onclick="startGame(3)">Level 3</button>
+      <button onclick="startGame(4)">Level 4</button>
+    </div>
+    <div id="game-section" class="hide">
+      <div class="level">Level: <span id="level">1</span></div>
+      <div class="word-display" id="word-display"></div>
+      <div class="input-container">
+        <input type="text" id="word-input" placeholder="Type the word here..." autofocus>
+      </div>
+      <div class="timer">Time Left: <span id="timer">10</span>s</div>
+      <div class="score">Score: <span id="score">0</span></div>
+      <div class="message" id="message"></div>
+    </div>
+  </div>
+
+  <script>
+    const wordsByLevel = {
+      1: ["apple", "chiuse", "asndato", "apple", "veniva", "piccolo", "altezza", "banana", "intorno", "nemmeno", "lascia", "troppo", "avrebbe", "naturaly", "suppliche", "supply", "cherry", "immediately", "brualita", "grape", "tenere", "cadono", "sapeva", "brandello", "grande", "esorto", "demo", "class", "room", "wind", "water", "woods", "child", "bedroom", "gate", "ways", "write", "bages", "pellow", "mistake", "sigma", "alfa", "beta", "red", "hate", "love", "servive", "social", "media", "doors", "esordi", "wash", "penitenza", "now", "anal", "itly", "rome", "indiana", "itineranti", "range", "internet", "automotrice", "sgomento", "cercare", "immorali", "andando", "salubre", "die", "live", "tea", "rice", "juice", "breed", "bread", "mango", "over", "shifter", "gear", "smart", "economy", "culture", "saremo", "ronaldo", "tormento", "lemon", "banana", "cherry", "grape", "lemon"],
+      2: ["orange", "peach", "pear", "plum", "kiwi", "level2", "affannose", "prezioso", "interi", "india", "orange", "malariche", "annichily", "prepara", "depravato", "respect", "clericale", "uggiosa", "people", "automotrice", "bonifica", "legible", "white", "diligente", "ragazzi", "troppo", "creduto", "eccitata", "sincrona", "emanazioni", "squallide", "acquitrini", "economisty", "particular", "ordinario", "egoistiche", "peach", "clear", "clever", "football", "bonifica", "pear", "washington", "magnificenza", "machine", "bricks",  "affezionate", "scepter", "throne", "light", "weight", "realm", "pizza", "macrony", "upload", "tracktor", "tracker", "jamer", "gamer", "gymer", "special", "happy", "prince", "cricket", "google", "files", "enrool", "cadente", "diging", "fortitude", "intercedere", "again", "depravato", "classroom", "bedroom", "bathroom", "servival", "victory", "struggle", "transparent", "beautiful", "wonderful", "imphisize", "exagarate", "blanket", "shadow", "umiliazione", "plum", "enjoy", "come", "peach", "pear", "plum", "kiwi"],
+      3: ["level3", "strawberry", "voluttuosa", "mandatelo", "quasare", "interamente", "clamoroso", "costumati", "pakistan", "america", "spain",  "blocks", "obstacles", "wrestle", "comeback", "comeagain", "loobster", "aprilfool", "donkey", "monkey", "villian", "prophet", "perfect", "better", "declaration", "onstitution", "renovation", "bamboo", "sovereignty", "swatiea", "policia", "criminal", "justice", "meerschaum", "umiliazione", "children", "sotterfugi", "i llustration", "blueberry", "aggravante", "naturalisty", "analfabetismo", "spiacque", "diventa", "interamente", "criminosita", "analfabeti", "appreciable", "raspberry", "scapigliata", "depaple", "archery", "acciottolato", "squallore", "tumultuoso", "antagonismo", "improvvisa", "squallore", "sincrona", "turbative", "tricky", "impigrimento", "inconciliabili", "aggressive", "inquisitori", "riluttanza", "esasperato", "blackberry", "affannosament", "psicoanalisti", "materia", "particolare", "convenzionale", "clericale", "galanterie", "strawberry", "blueberry", "raspberry", "blackberry", "watermelon"],
+      4: ["pineapple", "mango", "papaya", "guava", "dragonfruit", "with shift", "Immorali", "Sotterfugi", "Sopravvivere", "Monotonous", "Conscientious", "Apparizione", "Abbastanza", "Improvvisa", "Sommessamente", "Tentazione", "Brandello", "Intuivano", "Malsane", "Beatificazione", "Demografico", "Soprawivuta", "Circoscritta", "Inconciliabili", "Partenogenesi", "Congregazione", "Malvagio", "Institute", "Spontaneamente", "Particolare", "Esasperato", "Addomesticato", "Ornamentali", "anticlericalismo", "Sbrigativamente", "Vermiciattol", "Intervistaron", "L’esame"],
+    };
+
+    let currentLevel = 1;
+    let currentWordIndex = 0;
+    let score = 0;
+    let timeLeft = 10;
+    let timer;
+
+    const levelSelect = document.getElementById("level-select");
+    const gameSection = document.getElementById("game-section");
+    const wordDisplay = document.getElementById("word-display");
+    const wordInput = document.getElementById("word-input");
+    const timerDisplay = document.getElementById("timer");
+    const scoreDisplay = document.getElementById("score");
+    const levelDisplay = document.getElementById("level");
+    const messageDisplay = document.getElementById("message");
+    const menuDropdown = document.getElementById("menu-dropdown");
+
+    // Toggle the menu dropdown
+    function toggleMenu() {
+      menuDropdown.style.display = menuDropdown.style.display === "block" ? "none" : "block";
+    }
+
+    // Restart the game
+    function restartGame() {
+      currentWordIndex = 0;
+      score = 0;
+      timeLeft = 10;
+      scoreDisplay.textContent = score;
+      timerDisplay.textContent = timeLeft;
+      messageDisplay.textContent = "";
+      loadWord();
+      startTimer();
+      toggleMenu();
+    }
+
+    // Select another level
+    function selectLevel() {
+      gameSection.classList.add("hide");
+      levelSelect.classList.remove("hide");
+      toggleMenu();
+    }
+
+    // Quit the game
+    function quitGame() {
+      alert("Thanks for playing Word Master!");
+      window.location.reload(); // Reload the page to reset the game
+    }
+
+    // Start the game with the selected level
+    function startGame(level) {
+      currentLevel = level;
+      currentWordIndex = 0;
+      score = 0;
+      timeLeft = 9;
+      levelSelect.classList.add("hide");
+      gameSection.classList.remove("hide");
+      levelDisplay.textContent = currentLevel;
+      scoreDisplay.textContent = score;
+      initGame();
+    }
+
+    // Initialize the game
+    function initGame() {
+      loadWord();
+      startTimer(9);
+    }
+
+    // Load a word for the current level
+    function loadWord() {
+      const words = wordsByLevel[currentLevel];
+      if (currentWordIndex < words.length) {
+        wordDisplay.textContent = words[currentWordIndex];
+        wordInput.value = "";
+        wordInput.focus();
+      } else {
+        levelUp();
+      }
+    }
+
+    // Start the timer
+    function startTimer() {
+      timer = setInterval(() => {
+        timeLeft--;
+        timerDisplay.textContent = timeLeft;
+        if (timeLeft === 0) {
+          clearInterval(timer);
+          handleTimeOut();
+        }
+      }, 1000);
+    }
+
+    // Handle correct input
+    wordInput.addEventListener("input", () => {
+      if (wordInput.value === wordDisplay.textContent) {
+        clearInterval(timer);
+        score += 3;
+        scoreDisplay.textContent = score;
+        messageDisplay.textContent = "Correct! +03 points";
+        currentWordIndex++;
+        timeLeft = 9;
+        timerDisplay.textContent = timeLeft;
+        loadWord();
+        startTimer();
+      }
+    });
+
+    // Handle time out
+    function handleTimeOut() {
+      score -= 5;
+        scoreDisplay.textContent = score;
+        messageDisplay.textContent = "No No No! -05 points";
+      wordInput.value = "";
+      wordInput.focus();
+      timeLeft = 9;
+      timerDisplay.textContent = timeLeft;
+      startTimer();
+    }
+
+    // Level up
+    function levelUp() {
+      currentLevel++;
+      if (currentLevel > 4) {
+        messageDisplay.textContent = "Congratulations! You've completed all levels.";
+        return;
+      }
+      currentWordIndex = 0;
+      levelDisplay.textContent = currentLevel;
+      messageDisplay.textContent = `Level ${currentLevel} unlocked!`;
+      timeLeft = 9;
+      timerDisplay.textContent = timeLeft;
+      loadWord();
+    }
+  </script>
+</body>
+</html>
